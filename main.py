@@ -25,16 +25,27 @@ def saw(w, apps):
 	return [round(sum([apps[i][j] * w[j] for j in range(len(apps[i]))]), 3) for i in range(len(apps))]
 
 
+def mout(w, apps):
+	x_max = [max([x[i] for x in apps]) for i in range(len(apps[0]))]
+	x_min = [min([x[i] for x in apps]) for i in range(len(apps[0]))]
+	matrix = apps.copy()
+	for i in range(len(matrix)):
+		for j in range(len(matrix[0])):
+			matrix[i][j] = round((matrix[i][j] - x_min[j]) / (x_max[j] - x_min[j]), 3)
+	return [round(sum([matrix[i][j] * w[j] for j in range(len(matrix[i]))]), 3) for i in range(len(matrix))]
+
+
 if __name__ == '__main__':
 	c_app = 4
-	methods = ['saw', 'topical', 'mout']
+	methods = ['saw', 'mout', 'topical']
 
 	weight, dt_apps = pars(c_app)
 	apps = list(dt_apps.keys())
 	matrix = list(dt_apps.values())
 
 	r_saw = saw(weight, matrix)
+	r_maut = mout(weight, matrix)
 
 	print('\\', *methods)
 	for i in range(len(r_saw)):
-		print(apps[i], r_saw[i])
+		print(apps[i], r_saw[i], r_maut[i])
