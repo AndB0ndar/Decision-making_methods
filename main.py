@@ -1,4 +1,7 @@
+import copy
+
 from openpyxl import load_workbook
+import math
 
 
 def pars(c_app):
@@ -26,13 +29,44 @@ def saw(w, apps):
 
 
 def mout(w, apps):
-	x_max = [max([x[i] for x in apps]) for i in range(len(apps[0]))]
-	x_min = [min([x[i] for x in apps]) for i in range(len(apps[0]))]
-	matrix = apps.copy()
-	for i in range(len(matrix)):
-		for j in range(len(matrix[0])):
-			matrix[i][j] = round((matrix[i][j] - x_min[j]) / (x_max[j] - x_min[j]), 3)
-	return [round(sum([matrix[i][j] * w[j] for j in range(len(matrix[i]))]), 3) for i in range(len(matrix))]
+	mx = copy.deepcopy(apps)
+	x_max = [max([x[i] for x in mx]) for i in range(len(mx[0]))]
+	x_min = [min([x[i] for x in mx]) for i in range(len(mx[0]))]
+	for i in range(len(mx)):
+		for j in range(len(mx[0])):
+			mx[i][j] = round((mx[i][j] - x_min[j]) / (x_max[j] - x_min[j]), 3)
+	return [round(sum([mx[i][j] * w[j] for j in range(len(mx[i]))]), 3) for i in range(len(mx))]
+
+
+def topical(w, apps):
+	mx = copy.deepcopy(apps)
+	x_sqrt = []
+	for j in range(len(mx[0])):
+		x = 0
+		for i in range(len(mx)):
+			x += mx[i][j] ** 2
+		x_sqrt.append(math.sqrt(x))
+
+	for i in range(len(mx)):
+		for j in range(len(mx[0])):
+			mx[i][j] /= x_sqrt[j]
+			mx[i][j] *= w[j]
+	x_min = [max([x[i] for x in mx]) for i in range(len(mx[0]))]
+	x_max = [min([x[i] for x in mx]) for i in range(len(mx[0]))]
+
+	d1 = []
+	for i in range(len(mx)):
+		x = 0
+		for j in range(len(mx[0])):
+			x += (x_min[j] - mx[i][j]) ** 2
+		d1.append(math.sqrt(x))
+	d2 = []
+	for i in range(len(mx)):
+		x = 0
+		for j in range(len(mx[0])):
+			x += (x_max[j] - mx[i][j]) ** 2
+		d2.append(math.sqrt(x))
+	return [round(d2[i] / (d2[i] + d1[i]), 3) for i in range(len(d1))]
 
 
 if __name__ == '__main__':
@@ -45,7 +79,8 @@ if __name__ == '__main__':
 
 	r_saw = saw(weight, matrix)
 	r_maut = mout(weight, matrix)
+	r_topical = topical(weight, matrix)
 
 	print('\\', *methods)
 	for i in range(len(r_saw)):
-		print(apps[i], r_saw[i], r_maut[i])
+		print(apps[i], r_saw[i], r_maut[i], r_topical[i])
